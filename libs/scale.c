@@ -1,5 +1,3 @@
-// Mohammad Erfan Arasteh 9912762427
-
 /*
  *      scale 
  *
@@ -27,10 +25,7 @@
  *      newPic_row        >> We use this for scaling the oldPic in rows
  *      newPic_row_column >> We use this for scaling thw newPic_row in columns
  */
-typedef struct picture {
-        unsigned char arr[2000][2000][3];
-        int width, height;
-} picture;
+#include "./shared_structs.c"
 static picture oldPic, newPic_row, newPic_row_column;
 
 /* Every fraction consists of a numerator and a denominator

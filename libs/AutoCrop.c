@@ -1,5 +1,3 @@
-// Mohammad Erfan Arasteh 9912762427
-
 /*
  *      AutoCrop
  *      
@@ -24,10 +22,7 @@
  *      pic     >> we use this object to save our main picture
  *      tmp_pic >> we use this object temporary for cropping purposes
  */
-typedef struct picture {
-        unsigned char arr[2000][2000][3];
-        int width, height;
-} picture;
+#include "./shared_structs.c"
 static picture pic, tmp_pic;
 
 /* When we reserve memory using malloc ,then we need to remember it's
