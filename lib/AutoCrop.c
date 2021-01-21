@@ -8,44 +8,21 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <bmpio.h>
 
-
-/*              ** STRUCTURES **                */
-
-/* Every picture has a 3D array and a width and a height
- * and since a picture has huge array we'll declare
- * two picture globally:
- *      pic     >> we use this object to save our main picture
- *      tmp_pic >> we use this object temporary for cropping purposes
+/* All of Structures and Include dependencies are in AutoCrop.h
  */
-#include "./shared_structs.c"
+#include "../include/AutoCrop.h"
+
+
+/*********************************************************
+ *                  ** GLOBAL VARS **                    *
+ *********************************************************/
 static picture pic, tmp_pic;
 
-/* When we reserve memory using malloc ,then we need to remember it's
- * size . So structures are suitable for this purpose.
- */
-typedef struct malloc_array {
-        size_t sizeof_arr;
-        int *arr_po;
-} malloc_arr;
 
-/* If you want to crop a part of picture you need to save
- * cropping parameters . So structures are suitable for this purpose.
- */
-typedef struct square_frame {
-        int top;
-        int bottom;
-        int left;
-        int right;
-} square;
-
-
-/*              ** FUNCTION DEFINITIONS **              */
-
+/*********************************************************
+ *              ** FUNCTION DEFINITIONS **               *
+ *********************************************************/
 /* is_column_white / is_row_white:
  *      If a column/row from a number to a number was white
  *      returns 1 otherwise 0
@@ -188,7 +165,7 @@ static void crop_then_saveBMP(square *crop, char *output_path) {
 /* The main function of AutoCrop.c
  *
  */
-void AutoCrop(char *input_path) {
+extern void AutoCrop(char *input_path) {
         char path[100];
         strcpy(path , input_path);
 

@@ -1,3 +1,8 @@
+// Include guard
+#ifndef __SHARED_STRUCTS__H
+#define __SHARED_STRUCTS__H
+
+
 /* Every picture has a 3D array and a width and a height
  */
 typedef struct picture {
@@ -5,3 +10,5 @@ typedef struct picture {
         int width, height;
 } picture;
 
+
+#endif
