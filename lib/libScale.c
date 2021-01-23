@@ -120,6 +120,14 @@ extern void make_zero(picture *input_pic){
                         input_pic->arr[i][j][2]=0;
                 }
 }
+extern void make_zero_int(int_picture *input_pic){
+        for(int i=0;i<input_pic->height;i++)
+                for(int j=0;j<input_pic->width;j++){
+                        input_pic->arr[i][j][0]=0;
+                        input_pic->arr[i][j][1]=0;
+                        input_pic->arr[i][j][2]=0;
+                }
+}
 
 /* The main function of scale.c
  *

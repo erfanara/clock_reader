@@ -95,12 +95,14 @@ extern int AvgPic(char *path) {
 
         unsigned int count = 0;
 
+        /* Our specified width/height
+         */
         avg_pic.width = final_width;
         avg_pic.height = final_height;
-        tmp_pic_scale.width = final_width;
-        tmp_pic_scale.height = final_height;
         tmp_avg_pic.width = final_width;
         tmp_avg_pic.height = final_height;
+        tmp_pic_scale.width = final_width;
+        tmp_pic_scale.height = final_height;
 
         char tmp_path[512];
         while ((entry = readdir(dir_p)))
@@ -118,7 +120,6 @@ extern int AvgPic(char *path) {
 
                         sprintf(tmp_path, "%s/O_%s", path, entry->d_name);
                         saveBMP(tmp_pic_scale.arr, tmp_pic_scale.width, tmp_pic_scale.height, tmp_path);
-
                         make_zero(&tmp_pic_scale); // make all elements of array zero
                 }
 
@@ -126,6 +127,8 @@ extern int AvgPic(char *path) {
 
         sprintf(tmp_path, "%s/avg.bmp", path);
         saveBMP(avg_pic.arr, avg_pic.width, avg_pic.height, tmp_path);
+        make_zero(&avg_pic);
+        make_zero_int(&tmp_avg_pic);
 
         closedir(dir_p);
         return 0;

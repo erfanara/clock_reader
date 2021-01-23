@@ -68,6 +68,7 @@ typedef struct fraction {
  *      This function makes picture array zero.
  */
 extern void make_zero(picture *input_pic);
+extern void make_zero_int(int_picture *input_pic);
 
 /* The main function of scale.c
  *
