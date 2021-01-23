@@ -10,5 +10,9 @@ typedef struct picture {
         int width, height;
 } picture;
 
+typedef struct int_picture {
+        unsigned int arr[2000][2000][3];
+        int width, height;
+} int_picture;
 
 #endif

@@ -86,7 +86,15 @@ typedef struct square_frame {
 
 
 /* The main function of AutoCrop.c
+ * This function does the job. Crops pictures in a picture.
+ * This function wants output_directory for saving the output pictures.
+ * At the end returns number of pictures cropped.
  */
-extern void AutoCrop(char *input_path);
+extern int AutoCrop(char *pic_path,char *output_dir);
+
+/* If input picture was a single picture , then we need this function
+ * to remove the white lines.
+ */
+extern void SingleCrop(picture *input_pic,picture *output_pic);
 
 #endif

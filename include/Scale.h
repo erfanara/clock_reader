@@ -47,10 +47,10 @@ typedef struct fraction {
 /*********************************************************
  *             ** FUNCTION PROTOTYPES **                 *
  *********************************************************/
-/* cp_3d:
+/* sum_3d:
  *      Copies a source pixel to the destination pixel with given ratio in RGB layers.
  */
-//static void cp_3d(picture *dest, int dest_row, int dest_column, picture *src, int src_row, int src_column,
+//static void sum_3d(picture *dest, int dest_row, int dest_column, picture *src, int src_row, int src_column,
 //                  frac ratio);
 
 /* scale_row:
@@ -64,9 +64,14 @@ typedef struct fraction {
 //static void scale_column(picture *new_pic, picture *old_pic, int column);
 
 
+/* make_zero:
+ *      This function makes picture array zero.
+ */
+extern void make_zero(picture *input_pic);
+
 /* The main function of scale.c
  *
  */
-extern void Scale(char *input_path, int input_width, int input_height, char *output_name);
+extern void Scale(picture *input_pic, picture *output_pic);
 
 #endif

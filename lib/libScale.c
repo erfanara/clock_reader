@@ -19,16 +19,16 @@
 /*********************************************************
  *                  ** GLOBAL VARS **                    *
  *********************************************************/
-static picture oldPic, newPic_row, newPic_row_column;
+static picture tmp_pic;
 
 
 /*********************************************************
  *              ** FUNCTION DEFINITIONS **               *
  *********************************************************/
-/* cp_3d:
+/* sum_3d:
  *      Copies a source pixel to the destination pixel with given ratio in RGB layers.
  */
-static void cp_3d(picture *dest, int dest_row, int dest_column, picture *src, int src_row, int src_column,
+static void sum_3d(picture *dest, int dest_row, int dest_column, picture *src, int src_row, int src_column,
                   frac ratio) {
         dest->arr[dest_row][dest_column][0] += src->arr[src_row][src_column][0] * ratio.num / ratio.denom;
         dest->arr[dest_row][dest_column][1] += src->arr[src_row][src_column][1] * ratio.num / ratio.denom;
@@ -52,11 +52,11 @@ static void scale_row(picture *new_pic, picture *old_pic, int row) {
         int oldPic_seek = 0, newPic_seek = 0;
         while (oldPic_seek <= old_pic->width && newPic_seek <= new_pic->width) {
                 if (oldPic_share_tmp.num >= newPic_share_tmp.num) {
-                        cp_3d(new_pic, row, newPic_seek, old_pic, row, oldPic_seek, newPic_share_tmp);
+                        sum_3d(new_pic, row, newPic_seek, old_pic, row, oldPic_seek, newPic_share_tmp);
                         oldPic_share_tmp.num -= newPic_share_tmp.num;
                         newPic_share_tmp.num = 0;
                 } else {
-                        cp_3d(new_pic, row, newPic_seek, old_pic, row, oldPic_seek, oldPic_share_tmp);
+                        sum_3d(new_pic, row, newPic_seek, old_pic, row, oldPic_seek, oldPic_share_tmp);
                         newPic_share_tmp.num -= oldPic_share_tmp.num;
                         oldPic_share_tmp.num = 0;
                 }
@@ -89,11 +89,11 @@ static void scale_column(picture *new_pic, picture *old_pic, int column) {
         int oldPic_seek = 0, newPic_seek = 0;
         while (oldPic_seek <= old_pic->height && newPic_seek <= new_pic->height) {
                 if (oldPic_share_tmp.num >= newPic_share_tmp.num) {
-                        cp_3d(new_pic, newPic_seek, column, old_pic, oldPic_seek, column, newPic_share_tmp);
+                        sum_3d(new_pic, newPic_seek, column, old_pic, oldPic_seek, column, newPic_share_tmp);
                         oldPic_share_tmp.num -= newPic_share_tmp.num;
                         newPic_share_tmp.num = 0;
                 } else {
-                        cp_3d(new_pic, newPic_seek, column, old_pic, oldPic_seek, column, oldPic_share_tmp);
+                        sum_3d(new_pic, newPic_seek, column, old_pic, oldPic_seek, column, oldPic_share_tmp);
                         newPic_share_tmp.num -= oldPic_share_tmp.num;
                         oldPic_share_tmp.num = 0;
                 }
@@ -109,25 +109,29 @@ static void scale_column(picture *new_pic, picture *old_pic, int column) {
         }
 }
 
+/* make_zero:
+ *      This function makes picture array zero.
+ */
+extern void make_zero(picture *input_pic){
+        for(int i=0;i<input_pic->height;i++)
+                for(int j=0;j<input_pic->width;j++){
+                        input_pic->arr[i][j][0]=0;
+                        input_pic->arr[i][j][1]=0;
+                        input_pic->arr[i][j][2]=0;
+                }
+}
+
 /* The main function of scale.c
  *
  */
-extern void Scale(char *input_path, int input_width, int input_height, char *output_name) {
-        char path[100];
-        strcpy(path, input_path);
+extern void Scale(picture *input_pic, picture *output_pic) {
+        tmp_pic.width = output_pic->width;
+        tmp_pic.height = input_pic->height;
 
-        newPic_row_column.width = input_width;
-        newPic_row_column.height = input_height;
+        for (int i = 0; i < input_pic->height; i++)
+                scale_row(&tmp_pic, input_pic, i);
+        for (int i = 0; i < tmp_pic.width; i++)
+                scale_column(output_pic, &tmp_pic, i);
 
-        newPic_row.width = newPic_row_column.width;
-
-        readBMP(path, &oldPic.width, &oldPic.height, oldPic.arr);
-        newPic_row.height = oldPic.height;
-
-        for (int i = 0; i < oldPic.height; i++)
-                scale_row(&newPic_row, &oldPic, i);
-        for (int i = 0; i < newPic_row.width; i++)
-                scale_column(&newPic_row_column, &newPic_row, i);
-
-        saveBMP(newPic_row_column.arr, newPic_row_column.width, newPic_row_column.height, output_name);
+        make_zero(&tmp_pic);
 }
