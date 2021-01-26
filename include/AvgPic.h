@@ -17,13 +17,13 @@
 
 /* Include dependencies
  */
-#include "./AutoCrop.h"
-#include "./Scale.h"
-#include "./shared_structs.h"
 #include <bmpio.h>
 #include <dirent.h>
 #include <stdio.h>
 #include <string.h>
+#include "./AutoCrop.h"
+#include "./Scale.h"
+#include "./dir_utils.h"
 
 
 /*********************************************************
@@ -68,6 +68,6 @@
  * dirent.h) At the end creates avg.
  *      bmp returns 0 if operation was successful.
  */
-extern int AvgPic(char *path);
+extern int AvgPic(char *sign_path,int final_width,int final_height,char *working_dir);
 
 #endif

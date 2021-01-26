@@ -29,8 +29,6 @@
  */
 static picture tmp_pic, tmp_pic_scale, avg_pic;
 static int_picture tmp_avg_pic;
-unsigned int final_width = 300;
-unsigned int final_height = 600;
 
 
 /*********************************************************
@@ -41,9 +39,7 @@ unsigned int final_height = 600;
  *      returns 0 if not.
  */
 static int bmp_extension(char *file_name) {
-        unsigned int len = 0;
-        for (; file_name[len] != '\0'; len++)
-                ;
+        unsigned int len = strlen(file_name);
         if (file_name[len - 1] == 'p')
                 if (file_name[len - 2] == 'm')
                         if (file_name[len - 3] == 'b')
@@ -84,16 +80,21 @@ static void finalize_avg(picture *avg_pic, int_picture *tmp_avg_pic, int count) 
  * dirent.h) At the end creates avg.
  *      bmp returns 0 if operation was successful.
  */
-extern int AvgPic(char *path) {
+extern int AvgPic(char *sign_path, int final_width, int final_height, char *working_dir) {
+        char tmp_path[512];
+
+        make_dir(working_dir);
+        sprintf(tmp_path, "%s/%c", working_dir, sign_path[strlen(sign_path) - 1]);
+        make_dir(tmp_path);
+
         DIR *dir_p;
         struct dirent *entry;
-        dir_p = opendir(path);
+        dir_p = opendir(sign_path);
         if (dir_p == NULL) {
                 perror("opendir_average_func");
                 return -1;
         }
 
-        unsigned int count = 0;
 
         /* Our specified width/height
          */
@@ -104,12 +105,11 @@ extern int AvgPic(char *path) {
         tmp_pic_scale.width = final_width;
         tmp_pic_scale.height = final_height;
 
-        char tmp_path[512];
+        unsigned int count = 0;
         while ((entry = readdir(dir_p)))
-                if (bmp_extension(entry->d_name) && strcmp(entry->d_name, "avg.bmp") != 0 &&
-                    entry->d_name[0] != 'O') {
+                if (bmp_extension(entry->d_name)) {
                         count++;
-                        sprintf(tmp_path, "%s/%s", path, entry->d_name);
+                        sprintf(tmp_path, "%s/%s", sign_path, entry->d_name);
                         readBMP(tmp_path, &tmp_pic.width, &tmp_pic.height, tmp_pic.arr);
 
                         SingleCrop(&tmp_pic, &tmp_pic);
@@ -118,14 +118,15 @@ extern int AvgPic(char *path) {
 
                         sum_with(&tmp_avg_pic, &tmp_pic_scale);
 
-                        sprintf(tmp_path, "%s/O_%s", path, entry->d_name);
+                        sprintf(tmp_path, "%s/%c/O_%s", working_dir, sign_path[strlen(sign_path) - 1],
+                                entry->d_name);
                         saveBMP(tmp_pic_scale.arr, tmp_pic_scale.width, tmp_pic_scale.height, tmp_path);
                         make_zero(&tmp_pic_scale); // make all elements of array zero
                 }
 
         finalize_avg(&avg_pic, &tmp_avg_pic, count);
 
-        sprintf(tmp_path, "%s/avg.bmp", path);
+        sprintf(tmp_path, "%s/%c/avg.bmp", working_dir, sign_path[strlen(sign_path) - 1]);
         saveBMP(avg_pic.arr, avg_pic.width, avg_pic.height, tmp_path);
         make_zero(&avg_pic);
         make_zero_int(&tmp_avg_pic);
