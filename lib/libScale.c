@@ -25,14 +25,24 @@ static picture tmp_pic;
 /*********************************************************
  *              ** FUNCTION DEFINITIONS **               *
  *********************************************************/
-/* sum_3d:
- *      Copies a source pixel to the destination pixel with given ratio in RGB layers.
+/* sum_3d_buff:
+ *      Sums a source pixel with the specified pixel buffer with given ratio in RGB layers.
  */
-static void sum_3d(picture *dest, int dest_row, int dest_column, picture *src, int src_row, int src_column,
-                  frac ratio) {
-        dest->arr[dest_row][dest_column][0] += src->arr[src_row][src_column][0] * ratio.num / ratio.denom;
-        dest->arr[dest_row][dest_column][1] += src->arr[src_row][src_column][1] * ratio.num / ratio.denom;
-        dest->arr[dest_row][dest_column][2] += src->arr[src_row][src_column][2] * ratio.num / ratio.denom;
+static void sum_3d_buff(double pixel_buff[3],picture *src, int src_row, int src_column,frac ratio) {
+        pixel_buff[0] += src->arr[src_row][src_column][0] * (ratio.num / ratio.denom);
+        pixel_buff[1] += src->arr[src_row][src_column][1] * (ratio.num / ratio.denom);
+        pixel_buff[2] += src->arr[src_row][src_column][2] * (ratio.num / ratio.denom);
+}
+/* push_buff:
+ *      Pushes specified buffer on the destination pixel.
+ */
+static void push_buff(picture *dest, int dest_row, int dest_column,double pixel_buff[3]) {
+        dest->arr[dest_row][dest_column][0]=pixel_buff[0];
+        dest->arr[dest_row][dest_column][1]=pixel_buff[1];
+        dest->arr[dest_row][dest_column][2]=pixel_buff[2];
+        pixel_buff[0]=0;
+        pixel_buff[1]=0;
+        pixel_buff[2]=0;
 }
 
 /* scale_row:
@@ -49,19 +59,26 @@ static void scale_row(picture *new_pic, picture *old_pic, int row) {
          */
         frac newPic_share_tmp = {.num = old_pic->width, .denom = old_pic->width};
 
+        /* pixel_buff:
+         * Before every transfer from old_pic to every new_pic's pixel, we work on
+         * pixel_buff.
+         * At the end we push pixel_buff on corresponding new_pic's pixel.
+         */
+        double pixel_buff[3]={0};
         int oldPic_seek = 0, newPic_seek = 0;
         while (oldPic_seek <= old_pic->width && newPic_seek <= new_pic->width) {
                 if (oldPic_share_tmp.num >= newPic_share_tmp.num) {
-                        sum_3d(new_pic, row, newPic_seek, old_pic, row, oldPic_seek, newPic_share_tmp);
+                        sum_3d_buff(pixel_buff, old_pic, row, oldPic_seek, newPic_share_tmp);
                         oldPic_share_tmp.num -= newPic_share_tmp.num;
                         newPic_share_tmp.num = 0;
                 } else {
-                        sum_3d(new_pic, row, newPic_seek, old_pic, row, oldPic_seek, oldPic_share_tmp);
+                        sum_3d_buff(pixel_buff, old_pic, row, oldPic_seek, oldPic_share_tmp);
                         newPic_share_tmp.num -= oldPic_share_tmp.num;
                         oldPic_share_tmp.num = 0;
                 }
 
                 if (newPic_share_tmp.num == 0) {
+                        push_buff(new_pic,row,newPic_seek,pixel_buff);
                         newPic_seek++;
                         newPic_share_tmp.num = old_pic->width;
                 }
@@ -69,6 +86,7 @@ static void scale_row(picture *new_pic, picture *old_pic, int row) {
                         oldPic_seek++;
                         oldPic_share_tmp.num = new_pic->width;
                 }
+
         }
 }
 
@@ -86,19 +104,26 @@ static void scale_column(picture *new_pic, picture *old_pic, int column) {
          */
         frac newPic_share_tmp = {.num = old_pic->height, .denom = old_pic->height};
 
+        /* pixel_buff:
+         * Before every transfer from old_pic to every new_pic's pixel, we work on
+         * pixel_buff.
+         * At the end we push pixel_buff on corresponding new_pic's pixel.
+         */
+        double pixel_buff[3];
         int oldPic_seek = 0, newPic_seek = 0;
         while (oldPic_seek <= old_pic->height && newPic_seek <= new_pic->height) {
                 if (oldPic_share_tmp.num >= newPic_share_tmp.num) {
-                        sum_3d(new_pic, newPic_seek, column, old_pic, oldPic_seek, column, newPic_share_tmp);
+                        sum_3d_buff(pixel_buff,old_pic,oldPic_seek,column,newPic_share_tmp);
                         oldPic_share_tmp.num -= newPic_share_tmp.num;
                         newPic_share_tmp.num = 0;
                 } else {
-                        sum_3d(new_pic, newPic_seek, column, old_pic, oldPic_seek, column, oldPic_share_tmp);
+                        sum_3d_buff(pixel_buff, old_pic, oldPic_seek, column, oldPic_share_tmp);
                         newPic_share_tmp.num -= oldPic_share_tmp.num;
                         oldPic_share_tmp.num = 0;
                 }
 
                 if (newPic_share_tmp.num == 0) {
+                        push_buff(new_pic,newPic_seek,column,pixel_buff);
                         newPic_seek++;
                         newPic_share_tmp.num = old_pic->height;
                 }
@@ -133,7 +158,7 @@ extern void make_zero_int(int_picture *input_pic){
 }
 
 
-/* The main function of scale.c
+/* The main function of libScale.c
  *
  */
 extern void Scale(picture *input_pic, picture *output_pic) {

@@ -27,7 +27,7 @@
  *                              input pictures (tmp_pic).
  *      avg_pic            >> This is average picture obtained from tmp_avg_pic and number of input pictures.
  */
-static picture tmp_pic, tmp_pic_scale, avg_pic;
+static picture tmp_pic, tmp_pic_scale,avg_pic;
 static int_picture tmp_avg_pic;
 
 
@@ -72,7 +72,6 @@ static void finalize_avg(picture *avg_pic, int_picture *tmp_avg_pic, int count) 
                 }
 }
 
-
 /* AvgPic:
  *      Wants a picture directory.
  *      This function does the main job for us.
@@ -91,7 +90,7 @@ extern int AvgPic(char *sign_path, int final_width, int final_height, char *work
         struct dirent *entry;
         dir_p = opendir(sign_path);
         if (dir_p == NULL) {
-                perror("opendir_average_func");
+                perror("opendir_error_in_average_func");
                 return -1;
         }
 

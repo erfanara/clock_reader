@@ -21,7 +21,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <bmpio.h>
 
 
 /*********************************************************
@@ -39,19 +38,23 @@
 /* Every fraction consists of a numerator and a denominator
  */
 typedef struct fraction {
-        int num;
-        int denom;
+        double num;
+        double denom;
 } frac;
 
 
 /*********************************************************
  *             ** FUNCTION PROTOTYPES **                 *
  *********************************************************/
-/* sum_3d:
- *      Copies a source pixel to the destination pixel with given ratio in RGB layers.
+/* sum_3d_buff:
+ *      Sums a source pixel with the specified pixel buffer with given ratio in RGB layers.
  */
-//static void sum_3d(picture *dest, int dest_row, int dest_column, picture *src, int src_row, int src_column,
-//                  frac ratio);
+//static void sum_3d_buff(double pixel_buff[3],picture *src, int src_row, int src_column,frac ratio);
+
+/* push_buff:
+ *      Pushes specified buffer on the destination pixel.
+ */
+//static void push_buff(picture *dest, int dest_row, int dest_column,double pixel_buff[3]);
 
 /* scale_row:
  *      scales given row from old picture to the new picture.
@@ -74,7 +77,7 @@ extern void make_zero(picture *input_pic);
 extern void make_zero_int(int_picture *input_pic);
 
 
-/* The main function of scale.c
+/* The main function of libScale.c
  *
  */
 extern void Scale(picture *input_pic, picture *output_pic);
