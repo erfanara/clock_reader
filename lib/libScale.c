@@ -28,21 +28,21 @@ static picture tmp_pic;
 /* sum_3d_buff:
  *      Sums a source pixel with the specified pixel buffer with given ratio in RGB layers.
  */
-static void sum_3d_buff(double pixel_buff[3],picture *src, int src_row, int src_column,frac ratio) {
-        pixel_buff[0] += src->arr[src_row][src_column][0] * (ratio.num / ratio.denom);
-        pixel_buff[1] += src->arr[src_row][src_column][1] * (ratio.num / ratio.denom);
-        pixel_buff[2] += src->arr[src_row][src_column][2] * (ratio.num / ratio.denom);
+static void sum_3d_buff(double pixel_buff[3], picture *src, int src_row, int src_column, frac ratio) {
+        pixel_buff[0] += src->arr[src_row][src_column][0] * ratio.num / ratio.denom;
+        pixel_buff[1] += src->arr[src_row][src_column][1] * ratio.num / ratio.denom;
+        pixel_buff[2] += src->arr[src_row][src_column][2] * ratio.num / ratio.denom;
 }
 /* push_buff:
  *      Pushes specified buffer on the destination pixel.
  */
-static void push_buff(picture *dest, int dest_row, int dest_column,double pixel_buff[3]) {
-        dest->arr[dest_row][dest_column][0]=pixel_buff[0];
-        dest->arr[dest_row][dest_column][1]=pixel_buff[1];
-        dest->arr[dest_row][dest_column][2]=pixel_buff[2];
-        pixel_buff[0]=0;
-        pixel_buff[1]=0;
-        pixel_buff[2]=0;
+static void push_buff(picture *dest, int dest_row, int dest_column, double pixel_buff[3]) {
+        dest->arr[dest_row][dest_column][0] = pixel_buff[0];
+        dest->arr[dest_row][dest_column][1] = pixel_buff[1];
+        dest->arr[dest_row][dest_column][2] = pixel_buff[2];
+        pixel_buff[0] = 0;
+        pixel_buff[1] = 0;
+        pixel_buff[2] = 0;
 }
 
 /* scale_row:
@@ -64,9 +64,9 @@ static void scale_row(picture *new_pic, picture *old_pic, int row) {
          * pixel_buff.
          * At the end we push pixel_buff on corresponding new_pic's pixel.
          */
-        double pixel_buff[3]={0};
+        double pixel_buff[3] = {0};
         int oldPic_seek = 0, newPic_seek = 0;
-        while (oldPic_seek <= old_pic->width && newPic_seek <= new_pic->width) {
+        while (oldPic_seek < old_pic->width && newPic_seek < new_pic->width) {
                 if (oldPic_share_tmp.num >= newPic_share_tmp.num) {
                         sum_3d_buff(pixel_buff, old_pic, row, oldPic_seek, newPic_share_tmp);
                         oldPic_share_tmp.num -= newPic_share_tmp.num;
@@ -78,7 +78,7 @@ static void scale_row(picture *new_pic, picture *old_pic, int row) {
                 }
 
                 if (newPic_share_tmp.num == 0) {
-                        push_buff(new_pic,row,newPic_seek,pixel_buff);
+                        push_buff(new_pic, row, newPic_seek, pixel_buff);
                         newPic_seek++;
                         newPic_share_tmp.num = old_pic->width;
                 }
@@ -86,7 +86,6 @@ static void scale_row(picture *new_pic, picture *old_pic, int row) {
                         oldPic_seek++;
                         oldPic_share_tmp.num = new_pic->width;
                 }
-
         }
 }
 
@@ -109,11 +108,11 @@ static void scale_column(picture *new_pic, picture *old_pic, int column) {
          * pixel_buff.
          * At the end we push pixel_buff on corresponding new_pic's pixel.
          */
-        double pixel_buff[3];
+        double pixel_buff[3] = {0};
         int oldPic_seek = 0, newPic_seek = 0;
-        while (oldPic_seek <= old_pic->height && newPic_seek <= new_pic->height) {
+        while (oldPic_seek < old_pic->height && newPic_seek < new_pic->height) {
                 if (oldPic_share_tmp.num >= newPic_share_tmp.num) {
-                        sum_3d_buff(pixel_buff,old_pic,oldPic_seek,column,newPic_share_tmp);
+                        sum_3d_buff(pixel_buff, old_pic, oldPic_seek, column, newPic_share_tmp);
                         oldPic_share_tmp.num -= newPic_share_tmp.num;
                         newPic_share_tmp.num = 0;
                 } else {
@@ -123,7 +122,7 @@ static void scale_column(picture *new_pic, picture *old_pic, int column) {
                 }
 
                 if (newPic_share_tmp.num == 0) {
-                        push_buff(new_pic,newPic_seek,column,pixel_buff);
+                        push_buff(new_pic, newPic_seek, column, pixel_buff);
                         newPic_seek++;
                         newPic_share_tmp.num = old_pic->height;
                 }
@@ -137,23 +136,23 @@ static void scale_column(picture *new_pic, picture *old_pic, int column) {
 /* make_zero:
  *      This function makes picture array zero.
  */
-extern void make_zero(picture *input_pic){
-        for(int i=0;i<input_pic->height;i++)
-                for(int j=0;j<input_pic->width;j++){
-                        input_pic->arr[i][j][0]=0;
-                        input_pic->arr[i][j][1]=0;
-                        input_pic->arr[i][j][2]=0;
+extern void make_zero(picture *input_pic) {
+        for (int i = 0; i < input_pic->height; i++)
+                for (int j = 0; j < input_pic->width; j++) {
+                        input_pic->arr[i][j][0] = 0;
+                        input_pic->arr[i][j][1] = 0;
+                        input_pic->arr[i][j][2] = 0;
                 }
 }
 /* make_zero_int:
  *      Like make_zero but for int_picture.
  */
-extern void make_zero_int(int_picture *input_pic){
-        for(int i=0;i<input_pic->height;i++)
-                for(int j=0;j<input_pic->width;j++){
-                        input_pic->arr[i][j][0]=0;
-                        input_pic->arr[i][j][1]=0;
-                        input_pic->arr[i][j][2]=0;
+extern void make_zero_int(int_picture *input_pic) {
+        for (int i = 0; i < input_pic->height; i++)
+                for (int j = 0; j < input_pic->width; j++) {
+                        input_pic->arr[i][j][0] = 0;
+                        input_pic->arr[i][j][1] = 0;
+                        input_pic->arr[i][j][2] = 0;
                 }
 }
 
