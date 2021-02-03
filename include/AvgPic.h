@@ -67,12 +67,6 @@
  */
 extern void threshold_binary(picture *a, int value);
 
-/* avg_of_pic:
- *      Calculate average of all pixels with the average value less than given number.
- *      This function calculates average of 3 channels and compares it with given number.
- */
-extern unsigned int avg_of_pic(picture *a, int lessThan);
-
 /* poverty_line:
  *      This function finds a number [0,255] that n percent of given picture's pixels 
  *      are below that number.
