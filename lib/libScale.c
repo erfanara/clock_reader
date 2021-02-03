@@ -37,9 +37,9 @@ static void sum_3d_buff(double pixel_buff[3], picture *src, int src_row, int src
  *      Pushes specified buffer on the destination pixel.
  */
 static void push_buff(picture *dest, int dest_row, int dest_column, double pixel_buff[3]) {
-        dest->arr[dest_row][dest_column][0] = pixel_buff[0];
-        dest->arr[dest_row][dest_column][1] = pixel_buff[1];
-        dest->arr[dest_row][dest_column][2] = pixel_buff[2];
+        dest->arr[dest_row][dest_column][0] = roundl(pixel_buff[0]);
+        dest->arr[dest_row][dest_column][1] = roundl(pixel_buff[1]);
+        dest->arr[dest_row][dest_column][2] = roundl(pixel_buff[2]);
         pixel_buff[0] = 0;
         pixel_buff[1] = 0;
         pixel_buff[2] = 0;

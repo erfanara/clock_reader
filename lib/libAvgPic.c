@@ -27,7 +27,7 @@
  *                              input pictures (tmp_pic).
  *      avg_pic            >> This is average picture obtained from tmp_avg_pic and number of input pictures.
  */
-static picture tmp_pic, tmp_pic_scale,avg_pic;
+static picture tmp_pic, tmp_pic_scale, avg_pic;
 static int_picture tmp_avg_pic;
 
 
@@ -70,6 +70,71 @@ static void finalize_avg(picture *avg_pic, int_picture *tmp_avg_pic, int count) 
                         avg_pic->arr[i][j][1] = tmp_avg_pic->arr[i][j][1] / count;
                         avg_pic->arr[i][j][2] = tmp_avg_pic->arr[i][j][2] / count;
                 }
+}
+
+/* threshold_binary:
+ *      Make every pixel whose value is less than a given number totally black (0),
+ *      otherwise make it totally white (255).
+ */
+extern void threshold_binary(picture *a, int value) {
+        for (int i = 0; i < a->height; i++)
+                for (int j = 0; j < a->width; j++) {
+                        if (a->arr[i][j][0] < value || a->arr[i][j][1] < value || a->arr[i][j][2] < value) {
+                                a->arr[i][j][0] = 0;
+                                a->arr[i][j][1] = 0;
+                                a->arr[i][j][2] = 0;
+                        } else {
+                                a->arr[i][j][0] = 255;
+                                a->arr[i][j][1] = 255;
+                                a->arr[i][j][2] = 255;
+                        }
+                }
+}
+
+/* avg_of_pic:
+ *      Calculate average of all pixels with the average value less than given number.
+ *      This function calculates average of 3 channels and compares it with given number.
+ */
+extern unsigned int avg_of_pic(picture *a, int lessThan) {
+        unsigned long int avg = 0;
+        unsigned int tmp, count = 0;
+        for (int i = 0; i < a->height; i++) {
+                for (int j = 0; j < a->width; j++) {
+                        tmp = a->arr[i][j][0] + a->arr[i][j][1] + a->arr[i][j][2];
+                        tmp /= 3;
+                        if (tmp < lessThan) {
+                                avg += tmp;
+                                count++;
+                        }
+                }
+        }
+        return avg / count;
+}
+
+/* poverty_line:
+ *      This function finds a number [0,255] that n percent of given picture's pixels 
+ *      are below that number.
+ */
+extern unsigned int poverty_line(picture *a, unsigned int percent) {
+        unsigned int pix_map_count[256] = {0}, total = 0, i;
+        unsigned char pix_tmp;
+        for (i = 0; i < a->height; i++) {
+                for (int j = 0; j < a->width; j++) {
+                        pix_tmp = (a->arr[i][j][0] + a->arr[i][j][1] + a->arr[i][j][2]) / 3;
+                        if (pix_tmp < 253){
+                                pix_map_count[pix_tmp]++;
+                                total++;
+                        }
+                }
+        }
+
+        percent = total * percent / 100;
+
+        i = 0;
+        for (int x = 0; x <= percent; i++) {
+                x += pix_map_count[i];
+        }
+        return i;
 }
 
 /* AvgPic:
@@ -127,6 +192,13 @@ extern int AvgPic(char *sign_path, int final_width, int final_height, char *work
 
         sprintf(tmp_path, "%s/%c/avg.bmp", working_dir, sign_path[strlen(sign_path) - 1]);
         saveBMP(avg_pic.arr, avg_pic.width, avg_pic.height, tmp_path);
+
+        // threshold_binary(&avg_pic, avg_of_pic(&avg_pic, 253) + 10);
+        threshold_binary(&avg_pic, poverty_line(&avg_pic, 63));
+
+        sprintf(tmp_path, "%s/%c/avg_thr.bmp", working_dir, sign_path[strlen(sign_path) - 1]);
+        saveBMP(avg_pic.arr, avg_pic.width, avg_pic.height, tmp_path);
+
         make_zero(&avg_pic);
         make_zero_int(&tmp_avg_pic);
 

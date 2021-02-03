@@ -61,6 +61,25 @@
 // static void finalize_avg(picture *avg_pic, int_picture *tmp_avg_pic, int count) ;
 
 
+/* threshold_binary:
+ *      Make every pixel whose value is less than a given number totally black (0),
+ *      otherwise make it totally white (255).
+ */
+extern void threshold_binary(picture *a, int value);
+
+/* avg_of_pic:
+ *      Calculate average of all pixels with the average value less than given number.
+ *      This function calculates average of 3 channels and compares it with given number.
+ */
+extern unsigned int avg_of_pic(picture *a, int lessThan);
+
+/* poverty_line:
+ *      This function finds a number [0,255] that n percent of given picture's pixels 
+ *      are below that number.
+ */
+extern unsigned int poverty_line(picture *a, unsigned int percent); 
+
+
 /* AvgPic:
  *      Wants a picture directory.
  *      This function does the main job for us.
