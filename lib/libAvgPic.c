@@ -48,6 +48,44 @@ static int bmp_extension(char *file_name) {
         return 0;
 }
 
+/* check_cache:
+ *      This function checks the .cache file.
+ *      and compares its elements with the sign_path files.
+ *      if only every file name in sign_path directory was in .cache file then this function
+ *      returns 1, otherwise returns 1.
+ */
+static int check_cache(FILE *read_cache, char *sign_path) {
+        // Get ready for listing the sign_path directory
+        DIR *dir_p;
+        struct dirent *entry;
+        dir_p = opendir(sign_path);
+        if (dir_p == NULL) {
+                perror("opendir_error_in_check_cache");
+                return -1;
+        }
+
+        char name_in_cache[100];
+        int is_exist = 0;
+        while ((entry = readdir(dir_p)))
+                if (bmp_extension(entry->d_name)) {
+                        while (fscanf(read_cache, "%s\n", name_in_cache) != EOF)
+                                if (strcmp(entry->d_name, name_in_cache) == 0)
+                                        is_exist = 1;
+
+
+                        if (is_exist == 0)
+                                return 0;
+
+                        rewind(read_cache);
+                        is_exist = 0;
+                }
+
+        fclose(read_cache);
+        // cache seems to be ok , so return 1
+        return 1;
+}
+
+
 /* sum_with:
  *      Sums every pixel of from_pic with to_pic.
  */
@@ -92,7 +130,7 @@ extern void threshold_binary(picture *a, int value) {
 }
 
 /* poverty_line:
- *      This function finds a number [0,255] that n percent of given picture's pixels 
+ *      This function finds a number [0,255] that n percent of given picture's pixels
  *      are below that number.
  */
 extern unsigned int poverty_line(picture *a, unsigned int percent) {
@@ -101,7 +139,7 @@ extern unsigned int poverty_line(picture *a, unsigned int percent) {
         for (i = 0; i < a->height; i++) {
                 for (int j = 0; j < a->width; j++) {
                         pix_tmp = (a->arr[i][j][0] + a->arr[i][j][1] + a->arr[i][j][2]) / 3;
-                        if (pix_tmp < 253){
+                        if (pix_tmp < 253) {
                                 pix_map_count[pix_tmp]++;
                                 total++;
                         }
@@ -120,68 +158,97 @@ extern unsigned int poverty_line(picture *a, unsigned int percent) {
 /* AvgPic:
  *      Wants a picture directory.
  *      This function does the main job for us.
- *      This function finds every .bmp files except avg.bmp and O_X.bmp files.(for this purpose uses
- * dirent.h) At the end creates avg.
- *      bmp returns 0 if operation was successful.
+ *      This function finds every .bmp file (for this purpose uses dirent.h) in sign_path dir.
+ *      This function uses a very simple cache system , so if you call this function twice the running
+ *      time is less.
+ *
+ *      At the end creates avg.bmp and avg_thr.bmp
  */
-extern int AvgPic(char *sign_path, int final_width, int final_height, char *working_dir) {
-        char tmp_path[512];
+extern void AvgPic(char *sign_path, int final_width, int final_height, char *working_dir) {
+        char tmp_path[300], cache_path[256], sign;
+        sign = sign_path[strlen(sign_path) - 1];
 
+        // create working directory if not exist
         make_dir(working_dir);
-        sprintf(tmp_path, "%s/%c", working_dir, sign_path[strlen(sign_path) - 1]);
+
+        // create sign_path directory if not exist
+        sprintf(tmp_path, "%s/%c", working_dir, sign);
         make_dir(tmp_path);
 
+        // create .cache directory in working_dir if not exist
+        sprintf(tmp_path, "%s/.cache", working_dir);
+        make_dir(tmp_path);
+
+        // Get ready for listing the sign_path directory
         DIR *dir_p;
         struct dirent *entry;
         dir_p = opendir(sign_path);
         if (dir_p == NULL) {
                 perror("opendir_error_in_average_func");
-                return -1;
+                return;
         }
 
+        // Get ready for checking the cache file
+        FILE *read_cache;
+        sprintf(cache_path, "%s/.cache/%c.cache", working_dir, sign);
+        read_cache = fopen(cache_path, "r");
 
-        /* Our specified width/height
-         */
-        avg_pic.width = final_width;
-        avg_pic.height = final_height;
-        tmp_avg_pic.width = final_width;
-        tmp_avg_pic.height = final_height;
-        tmp_pic_scale.width = final_width;
-        tmp_pic_scale.height = final_height;
+        if (read_cache == NULL || !check_cache(read_cache, sign_path)) {
+                FILE *write_cache;
+                write_cache = fopen(cache_path, "w");
 
-        unsigned int count = 0;
-        while ((entry = readdir(dir_p)))
-                if (bmp_extension(entry->d_name)) {
-                        count++;
-                        sprintf(tmp_path, "%s/%s", sign_path, entry->d_name);
-                        readBMP(tmp_path, &tmp_pic.width, &tmp_pic.height, tmp_pic.arr);
+                /* Our specified width/height for scaling input pictures
+                 */
+                avg_pic.width = final_width;
+                avg_pic.height = final_height;
+                tmp_avg_pic.width = final_width;
+                tmp_avg_pic.height = final_height;
+                tmp_pic_scale.width = final_width;
+                tmp_pic_scale.height = final_height;
 
-                        SingleCrop(&tmp_pic, &tmp_pic);
+                unsigned int count = 0;
+                while ((entry = readdir(dir_p)))
+                        if (bmp_extension(entry->d_name)) {
+                                fprintf(write_cache, "%s\n", entry->d_name);
 
-                        Scale(&tmp_pic, &tmp_pic_scale);
+                                count++;
+                                sprintf(tmp_path, "%s/%s", sign_path, entry->d_name);
+                                readBMP(tmp_path, &tmp_pic.width, &tmp_pic.height, tmp_pic.arr);
 
-                        sum_with(&tmp_avg_pic, &tmp_pic_scale);
+                                SingleCrop(&tmp_pic, &tmp_pic);
 
-                        sprintf(tmp_path, "%s/%c/O_%s", working_dir, sign_path[strlen(sign_path) - 1],
-                                entry->d_name);
-                        saveBMP(tmp_pic_scale.arr, tmp_pic_scale.width, tmp_pic_scale.height, tmp_path);
-                        make_zero(&tmp_pic_scale); // make all elements of array zero
-                }
+                                Scale(&tmp_pic, &tmp_pic_scale);
 
-        finalize_avg(&avg_pic, &tmp_avg_pic, count);
+                                sum_with(&tmp_avg_pic, &tmp_pic_scale);
 
-        sprintf(tmp_path, "%s/%c/avg.bmp", working_dir, sign_path[strlen(sign_path) - 1]);
-        saveBMP(avg_pic.arr, avg_pic.width, avg_pic.height, tmp_path);
+                                // save the cropped scaled picture
+                                sprintf(tmp_path, "%s/%c/O_%s", working_dir, sign, entry->d_name);
+                                saveBMP(tmp_pic_scale.arr, tmp_pic_scale.width, tmp_pic_scale.height,
+                                        tmp_path);
+                                // make all elements of array zero
+                                make_zero(&tmp_pic_scale);
+                        }
 
-        // threshold_binary(&avg_pic, avg_of_pic(&avg_pic, 253) + 10);
-        threshold_binary(&avg_pic, poverty_line(&avg_pic, 63));
+                finalize_avg(&avg_pic, &tmp_avg_pic, count);
 
-        sprintf(tmp_path, "%s/%c/avg_thr.bmp", working_dir, sign_path[strlen(sign_path) - 1]);
-        saveBMP(avg_pic.arr, avg_pic.width, avg_pic.height, tmp_path);
+                // save the avg.bmp
+                sprintf(tmp_path, "%s/%c/avg.bmp", working_dir, sign);
+                saveBMP(avg_pic.arr, avg_pic.width, avg_pic.height, tmp_path);
 
-        make_zero(&avg_pic);
-        make_zero_int(&tmp_avg_pic);
+                // threshold the avg_pic with poverty_line number.
+                threshold_binary(&avg_pic, poverty_line(&avg_pic, 63));
+
+                // save the avg_thr.bmp
+                sprintf(tmp_path, "%s/%c/avg_thr.bmp", working_dir, sign);
+                saveBMP(avg_pic.arr, avg_pic.width, avg_pic.height, tmp_path);
+
+                // make all elements of array zero for next call
+                make_zero(&avg_pic);
+                make_zero_int(&tmp_avg_pic);
+
+                // close the FILE , so buffer can be flushed
+                fclose(write_cache);
+        }
 
         closedir(dir_p);
-        return 0;
 }

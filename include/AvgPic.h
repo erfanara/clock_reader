@@ -50,6 +50,15 @@
  */
 // static int bmp_extension(char *file_name) ;
 
+/* check_cache:
+ *      This function checks the .cache file. 
+ *      and compares its elements with the sign_path files.
+ *      if only every file name in sign_path directory was in .cache file then this function 
+ *      returns 1, otherwise returns 1.
+ */
+//static int check_cache(FILE *read_cache, char *sign_path);
+
+
 /* sum_with:
  *      Sums every pixel of from_pic with to_pic.
  */
@@ -77,10 +86,12 @@ extern unsigned int poverty_line(picture *a, unsigned int percent);
 /* AvgPic:
  *      Wants a picture directory.
  *      This function does the main job for us.
- *      This function finds every .bmp files except avg.bmp and O_X.bmp files.(for this purpose uses
- * dirent.h) At the end creates avg.
- *      bmp returns 0 if operation was successful.
+ *      This function finds every .bmp file (for this purpose uses dirent.h) in sign_path dir.
+ *      This function uses a very simple cache system , so if you call this function twice the running
+ *      time is less.
+ *
+ *      At the end creates avg.bmp and avg_thr.bmp 
  */
-extern int AvgPic(char *sign_path,int final_width,int final_height,char *working_dir);
+extern void AvgPic(char *sign_path,int final_width,int final_height,char *working_dir);
 
 #endif
