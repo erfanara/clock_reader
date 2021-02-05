@@ -64,7 +64,6 @@ extern unsigned int Recognition_pix(char *pic_path, char *DataSets_path) {
         output_pic.width = 300;
         output_pic.height = 500;
         Scale(&tmp_pic, &output_pic);
-        //threshold_binary(&output_pic,avg_of_pic(&output_pic,253)+5);
         threshold_binary(&output_pic,poverty_line(&output_pic,63));
 
         unsigned int max = 0, tmp_diff;
