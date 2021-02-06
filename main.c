@@ -90,6 +90,11 @@ void specify_DataSet_Cache() {
         printf("Your preferred height:  ");
         scanf("%d", &preferred_height);
 
+        for(int i=0;i<=9;i++){
+                sprintf(tmp_path,"%s/.cache/%d.cache",CACHE_PATH,i);
+                remove(tmp_path);
+        }
+
         for (int i = 0; i <= 9; i++) {
                 sprintf(tmp_path, "%s/%d", input, i);
                 if (!AvgPic(tmp_path, preferred_width, preferred_height, CACHE_PATH))
