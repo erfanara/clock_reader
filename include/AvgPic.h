@@ -56,7 +56,7 @@
  *      if only every file name in sign_path directory was in .cache file then this function 
  *      returns 1, otherwise returns 1.
  */
-//static int check_cache(FILE *read_cache,const char *sign_path);
+//static int check_cache(FILE *read_cache,const char *sign_path, int final_width,int final_height);
 
 
 /* sum_with:

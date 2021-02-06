@@ -54,7 +54,13 @@ static int bmp_extension(char *file_name) {
  *      if only every file name in sign_path directory was in .cache file then this function
  *      returns 1, otherwise returns 1.
  */
-static int check_cache(FILE *read_cache,const char *sign_path) {
+static int check_cache(FILE *read_cache, const char *sign_path, int final_width, int final_height) {
+        // Firstly check the final_width and final_height in cache file
+        int cache_width, cache_height;
+        fscanf(read_cache, "%d %d\n", &cache_width, &cache_height);
+        if (cache_width != final_width || cache_height != final_height)
+                return 0;
+
         // Get ready for listing the sign_path directory
         DIR *dir_p;
         struct dirent *entry;
@@ -164,7 +170,7 @@ extern unsigned int poverty_line(picture *a, unsigned int percent) {
  *
  *      At the end creates avg.bmp and avg_thr.bmp
  */
-extern int AvgPic(const char *sign_path, int final_width, int final_height,const char *working_dir) {
+extern int AvgPic(const char *sign_path, int final_width, int final_height, const char *working_dir) {
         char tmp_path[300], cache_path[256], sign;
         sign = sign_path[strlen(sign_path) - 1];
 
@@ -193,9 +199,10 @@ extern int AvgPic(const char *sign_path, int final_width, int final_height,const
         sprintf(cache_path, "%s/.cache/%c.cache", working_dir, sign);
         read_cache = fopen(cache_path, "r");
 
-        if (read_cache == NULL || !check_cache(read_cache, sign_path)) {
+        if (read_cache == NULL || !check_cache(read_cache, sign_path,final_width,final_height)) {
                 FILE *write_cache;
                 write_cache = fopen(cache_path, "w");
+                fprintf(write_cache, "%d %d\n", final_width, final_height);
 
                 /* Our specified width/height for scaling input pictures
                  */

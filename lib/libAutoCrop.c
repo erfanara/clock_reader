@@ -200,9 +200,7 @@ extern int AutoCrop(char *pic_path, char *output_dir) {
         }
         free(x->arr_po);
         free(y->arr_po);
-        free(x);
-        free(y);
-        free(y->arr_po);
+
         return cropped;
 }
 
