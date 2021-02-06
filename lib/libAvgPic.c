@@ -54,7 +54,7 @@ static int bmp_extension(char *file_name) {
  *      if only every file name in sign_path directory was in .cache file then this function
  *      returns 1, otherwise returns 1.
  */
-static int check_cache(FILE *read_cache, char *sign_path) {
+static int check_cache(FILE *read_cache,const char *sign_path) {
         // Get ready for listing the sign_path directory
         DIR *dir_p;
         struct dirent *entry;
@@ -164,7 +164,7 @@ extern unsigned int poverty_line(picture *a, unsigned int percent) {
  *
  *      At the end creates avg.bmp and avg_thr.bmp
  */
-extern void AvgPic(char *sign_path, int final_width, int final_height, char *working_dir) {
+extern int AvgPic(const char *sign_path, int final_width, int final_height,const char *working_dir) {
         char tmp_path[300], cache_path[256], sign;
         sign = sign_path[strlen(sign_path) - 1];
 
@@ -184,8 +184,8 @@ extern void AvgPic(char *sign_path, int final_width, int final_height, char *wor
         struct dirent *entry;
         dir_p = opendir(sign_path);
         if (dir_p == NULL) {
-                perror("opendir_error_in_average_func");
-                return;
+                perror("opendir_error_in_average_func, maybe the DataSet path is wrong");
+                return 0;
         }
 
         // Get ready for checking the cache file
@@ -251,4 +251,6 @@ extern void AvgPic(char *sign_path, int final_width, int final_height, char *wor
         }
 
         closedir(dir_p);
+
+        return 1;
 }

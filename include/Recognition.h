@@ -51,8 +51,9 @@
 /* Recognition_pix:
  *      This function returns recognized number (best match).
  *      This function works using pix_matches function. 
+ *      Width/height of Cache pictures should be given.
  */
-extern unsigned int Recognition_pix(char *pic_path, char *DataSets_path);
+extern unsigned int Recognition_pix(char *pic_path,const char *DataSets_path,int width,int height);
 
 
 #endif

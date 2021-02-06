@@ -12,11 +12,11 @@ INCLUDES= bmpio/include
 ifeq ($(detected_OS),Windows)
 LIBS = -lm lib/*.c bmpio/windows_x86_64/lib/libfcp.a
 main : main.c lib/*.c
-	$(CC) -Wall -static-libgcc -I$(INCLUDES) $(LIBS) `pkg-config --cflags gtk4` `pkg-config --libs gtk4` main.c -o main.exe
+	$(CC) -Wall -static-libgcc -I$(INCLUDES) $(LIBS)  main.c -o main.exe
 endif
 
 ifeq ($(detected_OS),Linux)
 LIBS = -lm lib/*.c bmpio/linux_x86_64/lib/libfcp.a
 main : main.c lib/*.c
-	$(CC) -Wall -static-libgcc -I$(INCLUDES) $(LIBS) `pkg-config --cflags gtk4` `pkg-config --libs gtk4` main.c -o main
+	$(CC) -Wall -static-libgcc -I$(INCLUDES) $(LIBS) main.c -o main
 endif

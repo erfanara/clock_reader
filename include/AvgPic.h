@@ -56,7 +56,7 @@
  *      if only every file name in sign_path directory was in .cache file then this function 
  *      returns 1, otherwise returns 1.
  */
-//static int check_cache(FILE *read_cache, char *sign_path);
+//static int check_cache(FILE *read_cache,const char *sign_path);
 
 
 /* sum_with:
@@ -92,6 +92,6 @@ extern unsigned int poverty_line(picture *a, unsigned int percent);
  *
  *      At the end creates avg.bmp and avg_thr.bmp 
  */
-extern void AvgPic(char *sign_path,int final_width,int final_height,char *working_dir);
+extern int AvgPic(const char *sign_path,int final_width,int final_height,const char *working_dir);
 
 #endif
